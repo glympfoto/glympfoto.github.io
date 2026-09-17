@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<title>GlympFoto</title>
+<style>
+  html,body{margin:0;padding:0;height:100%;background:#0b0b0d;color:#e8e8ea;
+    font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+  #frame{position:fixed;inset:0;width:100%;height:100%;border:0;background:#0b0b0d}
+  #fallback{position:fixed;left:0;right:0;bottom:0;padding:10px 14px;font-size:13px;
+    background:rgba(0,0,0,.55);display:none;text-align:center}
+  #fallback a{color:#9ecbff}
+</style>
+</head>
+<body>
+<iframe id="frame" title="GlympFoto" allow="camera; microphone" referrerpolicy="no-referrer"></iframe>
+  <div id="fallback">Memuat… <a id="direct" href="#">buka langsung</a> · <span id="hint" style="opacity:.8">kalau tetap hitam, buka pakai <b>www.</b></span></div>
+<script>
+(function () {
+  // Basis server asli (Tailscale Funnel, stabil per HP). Kalau URL ini berubah,
+  // cukup ganti satu baris ini lalu push ulang.
+  var BASE = 'https://tailscale-termux.taildcfa9a.ts.net';
+  var path = location.pathname + location.search + location.hash;
+
+  // Viewer (/v/, /s/) + guest (/g) aman di-iframe -> address bar tetap domain.
+  // Admin (/) butuh cookie sesi -> redirect langsung agar login tidak diblokir third-party cookie.
+  // Root (/) = halaman guest upload, jadi https://glympfoto.work.gd langsung bisa dipakai publik tanpa /g.
+  if (location.pathname === '/' || location.pathname === '/index.html') {
+    var url = BASE + '/g' + location.search + location.hash;
+    var frame = document.getElementById('frame');
+    var fb = document.getElementById('fallback');
+    frame.src = url;
+    document.getElementById('direct').href = url;
+    var t = setTimeout(function () { fb.style.display = 'block'; setTimeout(function(){ fb.style.display='none'; }, 8000); }, 12000);
+    frame.onload = function(){ clearTimeout(t); fb.style.display='none'; };
+    frame.onerror = function(){ clearTimeout(t); fb.style.display='block'; };
+  } else if (/^\/(v|s|g)(\/|$)/.test(location.pathname)) {
+    var url = BASE + path;
+    var frame = document.getElementById('frame');
+    var fb = document.getElementById('fallback');
+    frame.src = url;
+    document.getElementById('direct').href = url;
+    var t = setTimeout(function () { fb.style.display = 'block'; setTimeout(function(){ fb.style.display='none'; }, 8000); }, 12000);
+    frame.onload = function(){ clearTimeout(t); fb.style.display='none'; };
+    frame.onerror = function(){ clearTimeout(t); fb.style.display='block'; };
+  } else {
+    location.replace(BASE + path);
+  }
+})();
+</script>
+</body>
+</html>
