@@ -1,4 +1,6 @@
+import fs from 'node:fs';
 import path from 'node:path';
+import { config } from '../config.js';
 
 const ALLOWED_EXT = new Set(['.jpg', '.jpeg', '.png', '.webp', '.gif', '.heic', '.heif']);
 const ALLOWED_MIME = new Set([
@@ -30,4 +32,36 @@ export function safeJoin(baseDir: string, name: string): string | null {
   const resolved = path.resolve(baseDir, base);
   if (!resolved.startsWith(path.resolve(baseDir) + path.sep)) return null;
   return resolved;
+}
+
+/**
+ * Salin arsip foto ke SHARED_DIR (memori bersama, terlihat di galeri).
+ * Best-effort: tidak pernah melempar — gagal salin (mis. /sdcard tidak
+ * termount) hanya return null. Nama pakai nama asli; tabrakan diberi
+ * suffix -1, -2, ...
+ */
+export function mirrorToShared(absSrcPath: string, originalFilename: string): string | null {
+  try {
+    const dir = config.sharedDir;
+    if (!dir) return null;
+    fs.mkdirSync(dir, { recursive: true });
+    const safe = sanitizeFilename(originalFilename);
+    const ext = path.extname(safe);
+    const stem = path.basename(safe, ext) || 'photo';
+    let dest: string | null = null;
+    for (let i = 0; i < 100; i++) {
+      const candidate = i === 0 ? `${stem}${ext}` : `${stem}-${i}${ext}`;
+      const resolved = safeJoin(dir, candidate);
+      if (!resolved) return null;
+      if (!fs.existsSync(resolved)) {
+        dest = resolved;
+        break;
+      }
+    }
+    if (!dest) return null;
+    fs.copyFileSync(absSrcPath, dest);
+    return dest;
+  } catch {
+    return null;
+  }
 }

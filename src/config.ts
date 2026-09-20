@@ -41,6 +41,13 @@ export const config = {
   get guestUpload(): boolean {
     return env('GUEST_UPLOAD', '0') === '1';
   },
+  // Folder arsip di memori bersama (mis. /sdcard/GlympFoto) — setiap foto
+  // yang lolos upload disalin ke sini dengan nama aslinya agar terlihat
+  // di galeri/file manager. Kosong = mati. Best-effort: gagal salin tidak
+  // menggagalkan upload.
+  get sharedDir(): string {
+    return env('SHARED_DIR', '').trim();
+  },
   // Domain publik pembungkus (mis. GitHub Pages) yang boleh meng-iframe viewer.
   // Kosong = tidak ada pihak luar yang boleh embed (paling ketat).
   get publicHost(): string {

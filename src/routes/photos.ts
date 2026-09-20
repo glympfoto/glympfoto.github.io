@@ -6,7 +6,7 @@ import multer from 'multer';
 import { config, getOriginalsDir, getTmpDir } from '../config.js';
 import { getDb } from '../db.js';
 import { audit } from '../lib/audit.js';
-import { extOf, isAllowedExtMime, sanitizeFilename } from '../lib/files.js';
+import { extOf, isAllowedExtMime, mirrorToShared, sanitizeFilename } from '../lib/files.js';
 import { newId } from '../lib/tokens.js';
 import { thumbBuffer } from '../lib/watermark.js';
 import { adminAuth } from '../middleware/adminAuth.js';
@@ -76,6 +76,8 @@ router.post('/photos', uploadLimiter, (req, res, next) => makeUpload().single('p
     const dest = path.join(getOriginalsDir(), storedName);
     fs.renameSync(f.path, dest);
     const stat = fs.statSync(dest);
+    // Arsip ke memori bersama (best-effort, tidak menggagalkan upload)
+    mirrorToShared(dest, safeOriginal);
     db.prepare(
       `INSERT INTO photos(id, filename, stored_name, mime, size, width, height, created_at)
        VALUES(?,?,?,?,?,?,?,?)`,
