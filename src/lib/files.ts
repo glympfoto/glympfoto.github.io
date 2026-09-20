@@ -1,6 +1,5 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import { config } from '../config.js';
 
 const ALLOWED_EXT = new Set(['.jpg', '.jpeg', '.png', '.webp', '.gif', '.heic', '.heif']);
 const ALLOWED_MIME = new Set([
@@ -35,33 +34,24 @@ export function safeJoin(baseDir: string, name: string): string | null {
 }
 
 /**
- * Salin arsip foto ke SHARED_DIR (memori bersama, terlihat di galeri).
- * Best-effort: tidak pernah melempar — gagal salin (mis. /sdcard tidak
- * termount) hanya return null. Nama pakai nama asli; tabrakan diberi
- * suffix -1, -2, ...
+ * Nama simpan = nama asli tersanitasi; tabrakan diberi suffix -1, -2, ...
+ * Selalu basename (anti path traversal). Return null bila direktori
+ * tidak bisa dipakai.
  */
-export function mirrorToShared(absSrcPath: string, originalFilename: string): string | null {
+export function uniqueStoredName(dir: string, originalFilename: string): string | null {
   try {
-    const dir = config.sharedDir;
-    if (!dir) return null;
     fs.mkdirSync(dir, { recursive: true });
-    const safe = sanitizeFilename(originalFilename);
-    const ext = path.extname(safe);
-    const stem = path.basename(safe, ext) || 'photo';
-    let dest: string | null = null;
-    for (let i = 0; i < 100; i++) {
-      const candidate = i === 0 ? `${stem}${ext}` : `${stem}-${i}${ext}`;
-      const resolved = safeJoin(dir, candidate);
-      if (!resolved) return null;
-      if (!fs.existsSync(resolved)) {
-        dest = resolved;
-        break;
-      }
-    }
-    if (!dest) return null;
-    fs.copyFileSync(absSrcPath, dest);
-    return dest;
   } catch {
     return null;
   }
+  const safe = sanitizeFilename(originalFilename);
+  const ext = path.extname(safe);
+  const stem = path.basename(safe, ext) || 'photo';
+  for (let i = 0; i < 1000; i++) {
+    const candidate = i === 0 ? `${stem}${ext}` : `${stem}-${i}${ext}`;
+    const resolved = safeJoin(dir, candidate);
+    if (!resolved) return null;
+    if (!fs.existsSync(resolved)) return candidate;
+  }
+  return null;
 }

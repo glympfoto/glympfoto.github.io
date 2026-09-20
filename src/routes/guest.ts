@@ -5,7 +5,7 @@ import sharp from 'sharp';
 import multer from 'multer';
 import { config, getOriginalsDir, getTmpDir } from '../config.js';
 import { getDb } from '../db.js';
-import { extOf, isAllowedExtMime, mirrorToShared, sanitizeFilename } from '../lib/files.js';
+import { extOf, isAllowedExtMime, sanitizeFilename, uniqueStoredName } from '../lib/files.js';
 import { newId, secureToken, shortCode } from '../lib/tokens.js';
 import { guestUploadLimiter } from '../middleware/rateLimit.js';
 
@@ -105,13 +105,15 @@ router.post(
       return;
     }
     const photoId = newId();
-    const storedName = `${photoId}${ext}`;
-    fs.mkdirSync(getOriginalsDir(), { recursive: true });
+    const storedName = uniqueStoredName(getOriginalsDir(), safeOriginal);
+    if (!storedName) {
+      cleanup();
+      res.status(500).json({ error: 'upload_gagal' });
+      return;
+    }
     const dest = path.join(getOriginalsDir(), storedName);
     fs.renameSync(f.path, dest);
     const stat = fs.statSync(dest);
-    // Arsip ke memori bersama (best-effort, tidak menggagalkan upload)
-    mirrorToShared(dest, safeOriginal);
     const now = Date.now();
     db.prepare(
       `INSERT INTO photos(id, filename, stored_name, mime, size, width, height, created_at, guest)

@@ -24,10 +24,11 @@ echo "Backup .env sekarang (jaga-jaga)..."
 [ -f .env ] && cp .env ".env.sebelum-restore-$(date +%Y%m%d-%H%M%S)" || true
 
 echo "Extract $BACKUP ..."
-tar -xzf "$BACKUP"
+tar -xzPf "$BACKUP"
 
 echo "Perbaiki struktur..."
-mkdir -p data storage/originals storage/tmp logs
+if [ -f .env ]; then set -a; source .env 2>/dev/null; set +a; fi
+mkdir -p "${DATA_DIR:-./data}" "${STORAGE_DIR:-./storage}/originals" "${STORAGE_DIR:-./storage}/tmp" logs
 
 echo "Repair DB + build..."
 npm run db:init

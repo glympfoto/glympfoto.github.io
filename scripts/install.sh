@@ -46,9 +46,11 @@ fi
 
 echo ""
 echo "=== 4/6 Direktori + DB + build ==="
-mkdir -p data storage/originals storage/tmp logs
-[ -f storage/originals/.gitkeep ] || touch storage/originals/.gitkeep
-[ -f storage/tmp/.gitkeep ] || touch storage/tmp/.gitkeep
+if [ -f .env ]; then set -a; source .env 2>/dev/null; set +a; fi
+SD="${STORAGE_DIR:-./storage}"
+mkdir -p data "$SD/originals" "$SD/tmp" logs
+[ -f "$SD/originals/.gitkeep" ] || touch "$SD/originals/.gitkeep"
+[ -f "$SD/tmp/.gitkeep" ] || touch "$SD/tmp/.gitkeep"
 npm run db:init
 npm run build
 

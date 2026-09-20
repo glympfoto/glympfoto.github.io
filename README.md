@@ -63,7 +63,7 @@ Installer melakukan ini, berurutan (aman di-run ulang):
 2. Cek `tailscale-cli` / `tailscale` ada. Kalau belum ada, installer berhenti dan memberi tahu cara install — install dulu, lalu ulangi perintah ini.
 3. `npm install --no-audit`.
 4. Buat `.env` dari `.env.example` (kalau belum ada) + generate `ADMIN_TOKEN` acak 64 hex otomatis. **Catat isi `.env` — ini password adminmu.**
-5. `mkdir data storage/originals storage/tmp logs` + `npm run db:init` + `npm run build`.
+5. `mkdir` + `npm run db:init` + `npm run build` (folder mengikuti `DATA_DIR`/`STORAGE_DIR` di `.env`).
 6. Cek login Tailscale (`tailscale status`). Kalau belum login, ikuti perintah `tailscale up` yang ditampilkan.
 7. `bash scripts/start-all.sh` — start server + watchdog + funnel.
 
@@ -91,7 +91,7 @@ Bagikan `https://namahpmu.xxxxx.ts.net/g` untuk guest, atau link `/v/<token>` un
 | `ADMIN_TOKEN` | *(digenerate)* | Token darurat + fallback password. Wajib diganti/pakai hasil generate |
 | `ADMIN_PASSWORD` | *(kosong)* | Password login dashboard. Kalau kosong, pakai `ADMIN_TOKEN` |
 | `DATA_DIR` | `./data` | Lokasi SQLite |
-| `STORAGE_DIR` | `./storage` | Lokasi foto. Biarkan internal agar migrate mudah |
+| `STORAGE_DIR` | `./storage` | Lokasi foto. Bisa menunjuk memori bersama (mis. `/sdcard/GlympFoto`) agar langsung terlihat di file manager/galeri — wajib `termux-setup-storage` dulu. Foto disimpan dengan nama asli |
 | `DB_PATH` | `./data/glympfoto.db` | File database |
 | `MAX_UPLOAD_MB` | `15` | Batas upload |
 | `AUDIT_RETENTION_DAYS` | `90` | Retensi log audit (`0` = selamanya) |
@@ -307,7 +307,7 @@ glympfoto/
 - **Cloudflare Tunnel:** sudah dihapus total (`scripts/tunnel.sh` dibuang). Alasan: URL acak tiap restart, satu dependensi lebih sedikit. Konsekuensi: kalau Tailscale down, tidak ada jalur cadangan.
 - **Termux:Boot:** tidak ada auto-start habis reboot. Konsekuensi: start manual (lihat [bagian 6](#6-habis-reboot-hp)).
 - **Termux:API:** tidak ada wake-lock, notifikasi URL, atau log baterai. Semua pemakaian lama sudah dibersihkan dari script. Konsekuensi: baca [bagian 7](#7-agar-tidak-dibunuh-android).
-- **Storage `/sdcard`:** default kembali internal `./storage`. Kalau kamu masih pakai `/sdcard/GlympFoto` di `.env` lama, backup/restore tetap jalan tapi kamu wajib `termux-setup-storage` manual di HP baru. Untuk setup baru, biarkan `./storage`.
+- **Storage `/sdcard`:** didukung via `STORAGE_DIR=/sdcard/GlympFoto` (satu copy, nama asli, terlihat di file manager). Syarat: `termux-setup-storage` sudah jalan dan izin storage tidak dicabut — kalau `/sdcard` tidak bisa ditulis, upload gagal. Backup/restore mengikuti `STORAGE_DIR` dari `.env`. Untuk setup yang tidak butuh file terlihat di luar, biarkan `./storage` (internal, migrate paling mudah).
 
 ---
 

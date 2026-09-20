@@ -5,7 +5,7 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 if [ -f .env ]; then set -a; source .env 2>/dev/null; set +a; fi
-mkdir -p logs data storage/originals storage/tmp
+mkdir -p logs "${DATA_DIR:-./data}" "${STORAGE_DIR:-./storage}/originals" "${STORAGE_DIR:-./storage}/tmp"
 
 # Rotasi log: jaga ukuran < 2MB, simpan versi lama (.1)
 rotate_log() {

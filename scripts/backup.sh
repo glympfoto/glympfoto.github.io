@@ -1,5 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/bash
-# Backup Full GlympFoto: .env + database + foto (storage internal ./storage).
+# Backup Full GlympFoto: .env + database + foto (STORAGE_DIR dari .env).
 # Hasil: 1 file backup-glympfoto-YYYYMMDD-HHMMSS.tar.gz di folder projek.
 # Tidak ikut: node_modules/, dist/, logs/, *.pid, .tunnel-url, *.shm/*.wal.
 # Catatan: backup berisi SECRET (.env) — simpan di tempat aman, jangan upload publik.
@@ -10,6 +10,8 @@ cd "$(dirname "$0")/.."
 MODE="${1:---full}"
 OUT="./backup-glympfoto-$(date +%Y%m%d-%H%M%S).tar.gz"
 
+if [ -f .env ]; then set -a; source .env 2>/dev/null; set +a; fi
+SD="${STORAGE_DIR:-./storage}"
 if [ ! -f .env ]; then echo "Tidak ada .env — batal."; exit 1; fi
 if [ ! -f data/glympfoto.db ] && [ ! -f "${DB_PATH:-./data/glympfoto.db}" ]; then
   echo "Database tidak ketemu — jalankan npm run db:init dulu. Batal."
@@ -32,11 +34,11 @@ if [ "$MODE" = "--fresh" ]; then
     || tar -czf "$OUT" .env data 2>/dev/null
   echo "Backup FRESH tersimpan: $OUT (tanpa foto)"
 else
-  tar -czf "$OUT" \
+  tar -czPf "$OUT" \
     --exclude='*.shm' --exclude='*.wal' --exclude='*.bak.*' \
-    --exclude='storage/tmp/*' \
-    .env data/glympfoto.db storage/originals 2>/dev/null \
-    || tar -czf "$OUT" .env data storage 2>/dev/null
+    --exclude="$SD/tmp/*" \
+    .env data/glympfoto.db "$SD/originals" 2>/dev/null \
+    || tar -czPf "$OUT" .env data "$SD" 2>/dev/null
   echo "Backup FULL tersimpan: $OUT (.env + DB + foto)"
 fi
 ls -lh "$OUT"
