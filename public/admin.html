@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+<meta name="referrer" content="no-referrer"/>
+<title>GlympFoto — Admin</title>
+<link rel="stylesheet" href="/admin.css?v=25"/>
+</head>
+<body>
+<header class="appbar"><div class="brand">GlympFoto</div><div><span id="conn" class="conn">●</span> <button id="btn-logout" class="hidden" style="width:auto;padding:8px 14px;min-height:0;margin:0">Keluar</button></div></header>
+
+<section id="login" class="sheet">
+  <h1>Masuk admin</h1>
+  <p class="muted">Masukkan password admin dari file .env di server.</p>
+  <input id="token" type="password" placeholder="Password admin" autocomplete="current-password"/>
+  <button id="btn-login">Masuk</button>
+  <p id="login-err" class="err"></p>
+</section>
+
+<main id="app" class="hidden">
+  <nav class="tabs">
+    <button data-tab="upload" class="active">Upload</button>
+    <button data-tab="photos">Foto</button>
+    <button data-tab="audit">Riwayat</button>
+  </nav>
+
+  <section id="tab-upload" class="tab">
+    <div class="card">
+      <h2>Upload foto</h2>
+      <input id="file" type="file" accept="image/jpeg,image/png,image/webp,image/gif"/>
+      <progress id="prog" value="0" max="100" class="hidden"></progress>
+      <p id="up-status" class="muted"></p>
+      <button id="btn-upload">Upload</button>
+    </div>
+    <div class="card">
+      <h2>Buat secure link</h2>
+      <label>Foto <select id="s-photo"></select></label>
+      <label>Foto terbuka (detik)
+        <select id="s-open">
+          <option>5</option><option>10</option><option>15</option>
+          <option selected>30</option><option>60</option><option>120</option><option>300</option>
+        </select>
+      </label>
+      <label>Max views <input id="s-max" type="number" min="1" max="1000" placeholder="kosong = tanpa batas"/></label>
+      <label class="row"><input id="s-once" type="checkbox"/> One-time view</label>
+      <label>Expired dalam (detik, kosong = tanpa batas) <input id="s-exp" type="number" min="60" placeholder="mis. 86400"/></label>
+      <label class="row"><input id="s-wm" type="checkbox" checked/> Watermark forensic ON</label>
+      <p id="wm-warn" class="warn hidden">Watermark OFF — kemampuan tracing screenshot berkurang.</p>
+      <button id="btn-share">Generate link</button>
+      <div id="share-out" class="hidden">
+        <input id="share-link" readonly/>
+        <div class="btnrow">
+          <button id="btn-copy">Copy link</button>
+          <button id="btn-wa">Share</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="tab-photos" class="tab hidden">
+    <div class="card">
+      <div class="btnrow">
+        <button id="btn-photos-reload">Muat ulang</button>
+      </div>
+    </div>
+    <div id="photos" class="grid"></div>
+    <p id="photos-empty" class="muted hidden">Belum ada foto. Upload dulu.</p>
+  </section>
+
+  <section id="tab-audit" class="tab hidden">
+    <div class="card">
+      <h2>Riwayat akses</h2>
+      <p class="muted audit-hint">Siapa membuka foto, kapan, dan dari mana. Klik kartu untuk menyorot semua kejadian dalam sesi yang sama.</p>
+      <input id="audit-q" type="search" placeholder="Cari token, ID sesi, IP, atau detail…" class="audit-input"/>
+      <div class="pills" id="audit-pills">
+        <button class="pill active" data-f="all">Semua</button>
+        <button class="pill" data-f="view">Akses foto</button>
+        <button class="pill" data-f="sec">Keamanan</button>
+        <button class="pill" data-f="admin">Aktivitas admin</button>
+        <button class="pill" data-f="loc">Lokasi</button>
+      </div>
+      <div class="btnrow">
+        <button id="btn-audit">Muat ulang</button>
+        <button id="btn-cleanup">Hapus log lama</button>
+      </div>
+      <label class="ret-row">Retensi (hari, 0 = selamanya) <input id="ret" type="number" min="0" max="3650"/></label>
+      <button id="btn-ret">Simpan retensi</button>
+    </div>
+    <p id="audit-count" class="muted audit-count"></p>
+    <div id="logs" class="logs"></div>
+    <div class="btnrow loadmore-wrap"><button id="btn-more" class="hidden">Muat 100 lagi</button></div>
+  </section>
+</main>
+<script src="/admin.js?v=26"></script>
+</body>
+</html>

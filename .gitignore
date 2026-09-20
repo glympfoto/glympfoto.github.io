@@ -1,0 +1,15 @@
+node_modules/
+dist/
+data/*.db*
+data/*.db-*
+storage/originals/*
+!storage/originals/.gitkeep
+storage/tmp/*
+!storage/tmp/.gitkeep
+.env
+.env.sebelum-restore-*
+*.log
+logs/
+.tunnel-url
+coverage/
+backup-glympfoto-*.tar.gz

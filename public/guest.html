@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+<meta name="referrer" content="no-referrer"/>
+<title>GlympFoto — Kirim Foto</title>
+<link rel="stylesheet" href="/admin.css?v=21"/>
+</head>
+<body>
+<header class="appbar"><div class="brand">GlympFoto</div></header>
+<main>
+  <div class="card">
+    <h1>Kirim foto privat</h1>
+    <input id="file" type="file" accept="image/jpeg,image/png,image/webp,image/gif"/>
+    <label>Foto terbuka (detik)
+      <select id="s-open">
+        <option>5</option><option>10</option><option>15</option>
+        <option selected>30</option><option>60</option><option>120</option><option>300</option>
+      </select>
+    </label>
+    <label>Max views (maks 20) <input id="s-max" type="number" min="1" max="20" value="5"/></label>
+    <label class="row"><input id="s-once" type="checkbox"/> Sekali lihat saja</label>
+    <label>Link kedaluwarsa dalam
+      <select id="s-exp">
+        <option value="3600">1 jam</option>
+        <option value="86400" selected>24 jam</option>
+        <option value="259200">3 hari</option>
+        <option value="604800">7 hari</option>
+      </select>
+    </label>
+    <progress id="prog" value="0" max="100" class="hidden"></progress>
+    <p id="status" class="muted"></p>
+    <button id="btn-send">Kirim &amp; buat link</button>
+    <div id="out" class="hidden">
+      <input id="share-link" readonly/>
+      <div class="btnrow">
+        <button id="btn-copy">Copy link</button>
+        <button id="btn-share">Share</button>
+      </div>
+    </div>
+  </div>
+</main>
+<script src="/guest.js?v=21"></script>
+</body>
+</html>

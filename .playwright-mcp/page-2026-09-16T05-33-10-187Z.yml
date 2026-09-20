@@ -1,0 +1,10 @@
+- main [ref=e2]:
+  - generic [ref=e3]:
+    - generic [ref=e4]: GlympFoto
+    - timer [ref=e5]:
+      - generic [ref=e7]: "300"
+      - generic [ref=e8]: dtk
+  - generic [ref=e9]:
+    - paragraph [ref=e10]: Sedang menyiapkan foto mohon tunggu sebentar
+    - figure [ref=e11]
+    - paragraph [ref=e12]: Ketuk foto untuk memperbesar, ketuk lagi untuk mengecilkan.

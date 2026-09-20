@@ -1,0 +1,9 @@
+- main [ref=f1e2]:
+  - generic [ref=f1e3]:
+    - generic [ref=f1e4]: GlympFoto
+    - timer [ref=f1e5]:
+      - generic [ref=f1e7]: "300"
+      - generic [ref=f1e8]: dtk
+  - generic [ref=f1e9]:
+    - paragraph [ref=f1e10]: Sedang menyiapkan foto mohon tunggu sebentar
+    - figure [ref=f1e11]

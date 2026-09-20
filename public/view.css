@@ -1,0 +1,25 @@
+:root{--bg:#070a0e;--card:#15191d;--line:#242b32;--txt:#f2f4f6;--mut:#9aa3ad;--acc:#00e676;--acc2:#00c853}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--txt);font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;-webkit-user-select:none;user-select:none}
+.wrap{max-width:640px;margin:0 auto;padding:8px 12px 12px;min-height:100dvh;display:flex;flex-direction:column;gap:6px}
+.top{display:flex;justify-content:space-between;align-items:center;padding:4px 2px;gap:8px}
+.brand{font-weight:900;font-size:17px;letter-spacing:-.3px}
+.brand span{color:var(--acc)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:28px 18px;text-align:center;margin-top:16px}
+.spinner{width:34px;height:34px;border:3px solid var(--line);border-top-color:var(--acc);border-radius:50%;margin:0 auto 12px;animation:spin 0.9s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.hidden{display:none!important}
+.countdown{display:inline-flex;align-items:center;gap:6px;background:#10141a;border:1px solid var(--line);border-radius:999px;padding:6px 10px;margin:0 6px 0 0;font-weight:800;font-size:13px;flex-shrink:0}
+.countdown .dot{width:7px;height:7px;border-radius:50%;background:var(--acc);flex-shrink:0}
+.countdown.danger .dot{background:#ff3b30}
+.countdown b{font-size:13px}
+#state-photo{display:block}
+.photo-frame{margin:6px 0;background:#000;border-radius:18px;overflow:hidden;max-height:74vh;box-shadow:0 8px 32px rgba(0,0,0,.45);border:1px solid rgba(255,255,255,.06)}
+.photo-frame img{max-width:100%;max-height:74vh;width:auto;height:auto;object-fit:contain;display:block;margin:auto;pointer-events:auto;-webkit-user-drag:none}
+.hint{color:var(--mut);font-size:13px;text-align:center}
+.hold{margin:6px 0 0;background:#0f1410;border:1px solid rgba(0,230,118,.18);border-radius:999px;padding:8px 10px;display:flex;align-items:center;gap:10px;flex-shrink:0;box-shadow:0 0 0 1px rgba(0,230,118,.06), 0 8px 24px rgba(0,0,0,.4)}
+.hold-icon{width:42px;height:42px;border-radius:50%;background:radial-gradient(120% 120% at 30% 20%, #0aff8a 0%, #00c853 45%, #0a5a2e 100%);display:grid;place-items:center;flex-shrink:0;box-shadow:0 0 16px rgba(0,230,118,.32)}
+.hold-icon svg{width:22px;height:22px;color:#eafff3}
+.hold button{flex:1;text-align:left;background:transparent;border:0;color:var(--txt);font-weight:700;font-size:14px;padding:0;touch-action:none}
+.hold button:active{opacity:.9}
+@media print{body{display:none}}
