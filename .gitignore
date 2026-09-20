@@ -13,3 +13,4 @@ logs/
 .tunnel-url
 coverage/
 backup-glympfoto-*.tar.gz
+.playwright-mcp/
