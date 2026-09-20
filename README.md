@@ -45,6 +45,7 @@ Code + wrapper GitHub Pages hidup satu repo di `https://github.com/glympfoto/gly
 
 ```bash
 pkg update -y && pkg install -y git
+termux-setup-storage   # wajib kalau STORAGE_DIR menunjuk /sdcard — beri izin Files/Media
 git clone https://github.com/glympfoto/glympfoto.github.io ~/glympfoto
 cd ~/glympfoto
 ```
@@ -59,9 +60,9 @@ bash scripts/install.sh
 
 Installer melakukan ini, berurutan (aman di-run ulang):
 
-1. `pkg install nodejs-lts python make clang pkg-config wget openssh` — Node 22+ dibutuhkan (project ini jalan di Node 26).
-2. Cek `tailscale-cli` / `tailscale` ada. Kalau belum ada, installer berhenti dan memberi tahu cara install — install dulu, lalu ulangi perintah ini.
-3. `npm install --no-audit`.
+1. `pkg install nodejs-lts python make clang pkg-config wget openssh` — Node 22+ dibutuhkan (project ini jalan di Node 24/26).
+2. Cek `tailscale-cli` / `tailscale` ada. Paket Tailscale **tidak ada** di repo resmi Termux (`pkg install tailscale-termux` gagal) — install via `curl -fsSL https://raw.githubusercontent.com/bropines/tailscale-termux-cli/main/remote-install.sh | bash`, lalu ulangi installer ini.
+3. `npm install --no-audit --ignore-scripts --force` — flag wajib: `--force` meloloskan platform-check `@img/sharp-wasm32` di Android arm64 (sharp jalan via backend wasm), `--ignore-scripts` mencegah npm menjalankan script lifecycle saat install.
 4. Buat `.env` dari `.env.example` (kalau belum ada) + generate `ADMIN_TOKEN` acak 64 hex otomatis. **Catat isi `.env` — ini password adminmu.**
 5. `mkdir` + `npm run db:init` + `npm run build` (folder mengikuti `DATA_DIR`/`STORAGE_DIR` di `.env`).
 6. Cek login Tailscale (`tailscale status`). Kalau belum login, ikuti perintah `tailscale up` yang ditampilkan.
@@ -72,6 +73,8 @@ Installer melakukan ini, berurutan (aman di-run ulang):
 ```bash
 bash scripts/status.sh
 # harus: server pid RUN, watchdog pid RUN, local OK, publik OK
+# Catatan: publik FAIL dalam ±20 menit pertama itu normal (propagasi DNS
+# funnel) — tunggu lalu cek ulang, jangan restart-restart.
 ```
 
 Buka di HP: `http://127.0.0.1:3000` → login pakai `ADMIN_TOKEN` (atau `ADMIN_PASSWORD` kalau kamu set). Lihat URL publik:
@@ -146,11 +149,14 @@ cd ~/glympfoto
 ### Di HP BARU — restore
 
 ```bash
-# 1. install fresh dulu (sekali saja)
+# 1. install fresh dulu (sekali saja) — termasuk termux-setup-storage
+#    kalau STORAGE_DIR backup menunjuk /sdcard (cek isi backup dulu)
+pkg update -y && pkg install -y git
+termux-setup-storage
 git clone https://github.com/glympfoto/glympfoto.github.io ~/glympfoto
 cd ~/glympfoto
 bash scripts/install.sh
-# kalau diminta: tailscale up (login 1x via browser)
+# kalau diminta: tailscale up (login 1x via browser, buka URL fresh segera)
 
 # 2. copy file backup dari HP lama ke ~/glympfoto/, lalu:
 ./scripts/restore.sh backup-glympfoto-YYYYMMDD-HHMMSS.tar.gz
@@ -246,17 +252,22 @@ Semua `/api/*` (selain login/logout/guest) butuh cookie sesi, atau header `x-adm
 
 ## 10. Troubleshooting Termux
 
-- `tailscale: command not found` → install `tailscale-termux` dulu, lalu ulangi `bash scripts/install.sh`.
-- `tailscale status` → `Logged out` → `tailscale up`, login via browser, lalu `bash scripts/start-all.sh`.
-- `publik URL: (belum ada)` → cek `logs/funnel.log`. Biasanya belum `tailscale up`, atau funnel belum propagasi (±30 detik).
+- `tailscale: command not found` → paket tidak ada di repo resmi Termux. Install via `curl -fsSL https://raw.githubusercontent.com/bropines/tailscale-termux-cli/main/remote-install.sh | bash` (perintahnya `tailscale-cli`, bukan `tailscale`), lalu ulangi `bash scripts/install.sh`.
+- `tailscale status` → `Logged out` → `tailscale-cli up`, buka URL **fresh** segera di browser (URL hangus hitungan menit; tiap run `up` menghanguskan URL lama). Browser 403 session-expired → login dulu di `login.tailscale.com`, minta URL baru.
+- `publik URL: (belum ada)` → cek `logs/funnel.log`. Biasanya belum `tailscale up`, atau funnel belum propagasi (bisa sampai ±20 menit pertama — tunggu, jangan restart-restart).
+- `publik FAIL` padahal funnel on → verifikasi DNS publik ada isinya (DoH), lalu cek grant Funnel di admin console → machines. Node duplikat yang offline sebaiknya dihapus.
+- `npm install` gagal `EBADPLATFORM @img/sharp-wasm32` → ulangi dengan `npm install --no-audit --ignore-scripts --force` (jangan tanpa flag).
+- Upload gagal / `STORAGE_DIR ... tidak bisa ditulis` saat start → jalankan `termux-setup-storage` dan beri izin Files/Media ke Termux.
 - `local FAIL` → cek `logs/server.log` (ekor 20 baris terakhir). Seringnya `.env` rusak atau port bentrok → `PORT=3001 bash scripts/start-all.sh` untuk coba port lain.
-- `sharp` error `Could not load sharp` → pastikan `npm install` selesai dan `node_modules/@img/` ada. Kalau masih error: `rm -rf node_modules && npm install`.
+- `sharp` error `Could not load sharp` → pastikan `npm install` selesai dan `node_modules/@img/` ada. Kalau masih error: `rm -rf node_modules && npm install --no-audit --ignore-scripts --force`.
 - `better-sqlite3` error → **JANGAN** pakai `better-sqlite3`. Project ini pakai `node:sqlite` built-in. `rm -rf node_modules/better-sqlite3 && npm install`.
 - DB locked `SQLITE_BUSY` → `bash scripts/stop.sh`, `rm data/*.db-shm data/*.db-wal`, `npm run db:init`, `bash scripts/start-all.sh`.
-- Foto tidak muncul di viewer → cek `storage/originals` ada file, cek sesi belum expired, watermark Sharp butuh ~2-6 detik di wasm.
+- Foto tidak muncul di viewer → cek folder originals di `STORAGE_DIR` ada file, cek sesi belum expired, watermark Sharp butuh ~2-6 detik di wasm.
+- Link sekali-lihat langsung kedaluwarsa padahal "belum dibuka" → view dihitung **saat halaman dibuka** (JS otomatis POST `/open`), bukan saat foto ditahan. Jangan buka link sekali-lihat untuk ngetes.
+- Foto terasa "langsung kedaluwarsa" sebelum sempat ditahan → countdown mulai **sejak halaman dibuka**, kepotong dialog izin lokasi + render watermark. Pakai durasi lebih panjang (60–300 dtk) dan tahan segera begitu foto muncul.
 - Restore: `node_modules belum ada` → jalankan `bash scripts/install.sh` dulu sebelum `restore.sh`.
 - `git clone` repo privat gagal auth → pakai Personal Access Token sebagai password.
-- Tests (opsional, ~40 detik di HP): `npm test` → harus `Test Files 1 passed, Tests 17 passed`.
+- Tests (opsional, ~40 detik di HP): `npm test` → semua passed.
 - Cleanup log lama & tmp: `npm run cleanup`.
 
 ---

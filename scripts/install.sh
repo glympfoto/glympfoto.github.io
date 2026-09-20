@@ -12,8 +12,8 @@ pkg install -y nodejs-lts python make clang pkg-config wget openssh
 
 if ! command -v tailscale-cli >/dev/null 2>&1 && ! command -v tailscale >/dev/null 2>&1; then
   echo ""
-  echo "Tailscale belum ada. Install manual:"
-  echo "  pkg install tailscale-termux   # atau ikuti instruksi repo tailscale-termux"
+  echo "Tailscale belum ada (paketnya tidak tersedia di repo resmi Termux). Install via:"
+  echo "  curl -fsSL https://raw.githubusercontent.com/bropines/tailscale-termux-cli/main/remote-install.sh | bash"
   echo "Lalu jalankan lagi: bash scripts/install.sh"
   exit 1
 fi
@@ -24,7 +24,11 @@ echo "tailscale: $("$TS" version 2>/dev/null | head -1)"
 
 echo ""
 echo "=== 2/6 npm install ==="
-npm install --no-audit
+# --force: loloskan platform-check @img/sharp-wasm32 di Android arm64
+#   (sharp jalan via backend wasm, terbukti berfungsi).
+# --ignore-scripts: cegah npm menjalankan script lifecycle (termasuk
+#   script bernama "install" bila ada) selama instalasi dependensi.
+npm install --no-audit --ignore-scripts --force
 
 echo ""
 echo "=== 3/6 File .env ==="

@@ -7,6 +7,15 @@ cd "$(dirname "$0")/.."
 if [ -f .env ]; then set -a; source .env 2>/dev/null; set +a; fi
 mkdir -p logs "${DATA_DIR:-./data}" "${STORAGE_DIR:-./storage}/originals" "${STORAGE_DIR:-./storage}/tmp"
 
+# Gagal cepat kalau STORAGE_DIR (mis. /sdcard/...) tidak bisa ditulis —
+# tanpa ini upload gagal misterius dan viewer 410.
+if [ ! -w "${STORAGE_DIR:-./storage}/originals" ]; then
+  echo "ERROR: ${STORAGE_DIR:-./storage}/originals tidak bisa ditulis."
+  echo "Kalau STORAGE_DIR menunjuk /sdcard, jalankan 'termux-setup-storage'"
+  echo "dan beri izin Files/Media ke Termux, lalu ulangi."
+  exit 1
+fi
+
 # Rotasi log: jaga ukuran < 2MB, simpan versi lama (.1)
 rotate_log() {
   local f="$1"
