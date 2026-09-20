@@ -28,7 +28,19 @@ function ensureFont(): Promise<void> {
         if (!fs.existsSync(p)) continue;
         const f = PImage.registerFont(p, 'wmfont');
         await f.load();
-        if (f.loaded) return;
+        if (!f.loaded) continue;
+        // pureimage mem-bundle opentype dengan parser GPOS yang crash
+        // ("h[d] is not a function") untuk font bervolume seperti Roboto/
+        // DejaVu di Node 24 — lookup kerning yang tak dikenal me-return
+        // undefined lalu dipanggil sebagai fungsi. Kerning hanya mengatur
+        // spasi antar-huruf, jadi aman dinolkan untuk watermark.
+        try {
+          const inner = (f as unknown as { font?: { getKerningValue?: unknown } }).font;
+          if (inner) inner.getKerningValue = () => 0;
+        } catch {
+          /* lanjut tanpa patch — fillText mungkin tetap crash dan ditangani pemanggil */
+        }
+        return;
       } catch {
         /* cek kandidat berikutnya */
       }
