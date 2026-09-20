@@ -22,6 +22,7 @@ Mobile-first, premium minimal, bukan AI-slop.
 10. [Troubleshooting](#10-troubleshooting-termux)
 11. [Struktur project](#11-struktur-project)
 12. [Yang TIDAK dipakai (sengaja)](#12-yang-tidak-dipakai-sengaja)
+13. [Wrapper GitHub Pages](#13-wrapper-github-pages)
 
 ---
 
@@ -40,16 +41,15 @@ Tidak perlu: Cloudflare, domain sendiri, Termux:Boot, Termux:API, root.
 
 ### Langkah 1 — Siapkan repo
 
-Kalau kamu pindahan dari HP lama, codenya ada di GitHub privatmu. Di Termux **baru**:
+Code + wrapper GitHub Pages hidup satu repo di `https://github.com/glympfoto/glympfoto.github.io` (branch `main`, lihat [bagian 13](#13-wrapper-github-pages)). Di Termux **baru**:
 
 ```bash
 pkg update -y && pkg install -y git
-git clone <url-repo-privat-kamu> ~/glympfoto
+git clone https://github.com/glympfoto/glympfoto.github.io ~/glympfoto
 cd ~/glympfoto
 ```
 
-> `<url-repo-privat-kamu>` = URL HTTPS repo GitHub privatmu, mis. `https://github.com/username/glympfoto.git`.
-> Saat `git clone` diminta username + password: password = **Personal Access Token** GitHub (bukan password akun). Buat di GitHub → Settings → Developer settings → Personal access tokens → `repo` saja.
+> Repo ini publik — aman, karena secret (`.env`, database, foto) semuanya di-`.gitignore` dan tidak ikut push. Kalau `git clone`/`push` diminta password: pakai **Personal Access Token** GitHub (bukan password akun). Buat di GitHub → Settings → Developer settings → Personal access tokens → centang `repo`.
 
 ### Langkah 2 — Jalankan installer
 
@@ -147,7 +147,7 @@ cd ~/glympfoto
 
 ```bash
 # 1. install fresh dulu (sekali saja)
-git clone <url-repo-privat-kamu> ~/glympfoto
+git clone https://github.com/glympfoto/glympfoto.github.io ~/glympfoto
 cd ~/glympfoto
 bash scripts/install.sh
 # kalau diminta: tailscale up (login 1x via browser)
@@ -308,6 +308,23 @@ glympfoto/
 - **Termux:Boot:** tidak ada auto-start habis reboot. Konsekuensi: start manual (lihat [bagian 6](#6-habis-reboot-hp)).
 - **Termux:API:** tidak ada wake-lock, notifikasi URL, atau log baterai. Semua pemakaian lama sudah dibersihkan dari script. Konsekuensi: baca [bagian 7](#7-agar-tidak-dibunuh-android).
 - **Storage `/sdcard`:** default kembali internal `./storage`. Kalau kamu masih pakai `/sdcard/GlympFoto` di `.env` lama, backup/restore tetap jalan tapi kamu wajib `termux-setup-storage` manual di HP baru. Untuk setup baru, biarkan `./storage`.
+
+---
+
+## 13. Wrapper GitHub Pages
+
+Repo ini ganda: selain code app Termux, branch `main` juga menayangkan wrapper publik di `https://glympfoto.github.io` (file `index.html` + `404.html` di root). Wrapper ini iframe yang menunjuk ke Tailscale Funnel HP-mu, jadi tamu bisa buka link cantik tanpa tahu URL `ts.net` aslinya.
+
+- **Sumber wrapper:** `pages/index.html`, `pages/404.html`, `pages/CNAME`. Edit di sini.
+- **Deploy:** copy ke root lalu push — GitHub Pages redeploy ±1 menit:
+  ```bash
+  cp pages/index.html ./index.html
+  cp pages/404.html ./404.html
+  git add index.html 404.html && git commit -m "Update wrapper" && git push
+  ```
+  (File root dan `pages/` saat ini identik — jangan edit root langsung, nanti divergen.)
+- **Ganti URL funnel:** cukup ganti satu baris `var BASE = '...'` di `pages/index.html` + `pages/404.html`, copy ke root, push. Lihat juga `PUBLIC_HOST` di `.env` (domain yang boleh iframe viewer — harus cocok dengan domain wrapper).
+- Jangan taruh secret di file wrapper — repo ini publik.
 
 ---
 
