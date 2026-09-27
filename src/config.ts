@@ -43,7 +43,7 @@ export const config = {
   },
   // Domain publik pembungkus (mis. GitHub Pages) yang boleh meng-iframe viewer.
   // Kosong = tidak ada pihak luar yang boleh embed (paling ketat).
-  // Bisa satu atau daftar koma: "glympfoto.work.gd,glympfoto.github.io"
+  // Bisa satu atau daftar koma: "glympfoto.github.io"
   get publicHost(): string {
     return this.publicHosts[0] ?? '';
   },

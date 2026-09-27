@@ -26,7 +26,7 @@
 
   // Viewer (/v/, /s/) + guest (/g) aman di-iframe -> address bar tetap domain.
   // Admin (/) butuh cookie sesi -> redirect langsung agar login tidak diblokir third-party cookie.
-  // Root (/) = halaman guest upload, jadi https://glympfoto.work.gd langsung bisa dipakai publik tanpa /g.
+  // Root (/) = halaman guest upload, jadi https://glympfoto.github.io langsung bisa dipakai publik tanpa /g.
   if (location.pathname === '/' || location.pathname === '/index.html') {
     var url = BASE + '/g' + location.search + location.hash;
     var frame = document.getElementById('frame');

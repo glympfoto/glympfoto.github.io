@@ -3,8 +3,8 @@ import helmet from 'helmet';
 import { config } from '../config.js';
 
 // Domain pembungkus (PUBLIC_HOST) boleh meng-iframe viewer; tanpa itu tetap 'none'.
-// Mendukung daftar koma: "glympfoto.work.gd,glympfoto.github.io".
-// Kasusnya www vs apex — izinkan keduanya biar https://glympfoto.work.gd juga bisa.
+// Mendukung daftar koma: "glympfoto.github.io".
+// Kasusnya www vs apex — izinkan keduanya bila pakai custom domain.
 // frameguard dimatikan karena CSP sudah modern.
 const frameParents = (() => {
   const hosts = config.publicHosts;
