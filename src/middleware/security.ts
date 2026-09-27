@@ -3,18 +3,20 @@ import helmet from 'helmet';
 import { config } from '../config.js';
 
 // Domain pembungkus (PUBLIC_HOST) boleh meng-iframe viewer; tanpa itu tetap 'none'.
-// Kasusnya www vs apex — izinkan keduanya biar https://glympfoto.work.gd juga bisa
-// (user di screenshot buka tanpa www). frameguard dimatikan karena CSP sudah modern.
-const extraFrameHosts = (() => {
-  const h = config.publicHost;
-  if (!h) return [];
-  if (h === 'www.glympfoto.work.gd') return ['https://glympfoto.work.gd'];
-  if (h === 'glympfoto.work.gd') return ['https://www.glympfoto.work.gd'];
-  return [];
+// Mendukung daftar koma: "glympfoto.work.gd,glympfoto.github.io".
+// Kasusnya www vs apex — izinkan keduanya biar https://glympfoto.work.gd juga bisa.
+// frameguard dimatikan karena CSP sudah modern.
+const frameParents = (() => {
+  const hosts = config.publicHosts;
+  if (hosts.length === 0) return ["'none'"];
+  const out = new Set<string>(["'self'"]);
+  for (const h of hosts) {
+    out.add(`https://${h}`);
+    if (h === 'www.glympfoto.work.gd') out.add('https://glympfoto.work.gd');
+    if (h === 'glympfoto.work.gd') out.add('https://www.glympfoto.work.gd');
+  }
+  return [...out];
 })();
-const frameParents = config.publicHost
-  ? ["'self'", `https://${config.publicHost}`, ...extraFrameHosts]
-  : ["'none'"];
 
 export const helmetMiddleware = helmet({
   contentSecurityPolicy: {
