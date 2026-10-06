@@ -4,7 +4,7 @@ import { config } from '../config.js';
 
 // Domain pembungkus (PUBLIC_HOST) boleh meng-iframe viewer; tanpa itu tetap 'none'.
 // Mendukung daftar koma: "glympfoto.github.io".
-// Kasusnya www vs apex — izinkan keduanya bila pakai custom domain.
+// www vs apex — izinkan keduanya secara generik (mis. github.io apex + www).
 // frameguard dimatikan karena CSP sudah modern.
 const frameParents = (() => {
   const hosts = config.publicHosts;
@@ -12,8 +12,8 @@ const frameParents = (() => {
   const out = new Set<string>(["'self'"]);
   for (const h of hosts) {
     out.add(`https://${h}`);
-    if (h === 'www.glympfoto.work.gd') out.add('https://glympfoto.work.gd');
-    if (h === 'glympfoto.work.gd') out.add('https://www.glympfoto.work.gd');
+    if (h.startsWith('www.')) out.add(`https://${h.slice(4)}`);
+    else out.add(`https://www.${h}`);
   }
   return [...out];
 })();

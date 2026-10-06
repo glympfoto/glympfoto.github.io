@@ -326,12 +326,12 @@ glympfoto/
 
 Repo ini ganda: selain code app Termux, branch `main` juga menayangkan wrapper publik di `https://glympfoto.github.io` (file `index.html` + `404.html` di root). Wrapper ini iframe yang menunjuk ke Tailscale Funnel HP-mu, jadi tamu bisa buka link cantik tanpa tahu URL `ts.net` aslinya.
 
-- **Sumber wrapper:** `pages/index.html`, `pages/404.html`, `pages/CNAME`. Edit di sini.
+- **Sumber wrapper:** `pages/index.html`, `pages/404.html`. Edit di sini.
 - **Deploy:** copy ke root lalu push — GitHub Pages redeploy ±1 menit:
   ```bash
   cp pages/index.html ./index.html
   cp pages/404.html ./404.html
-  git add index.html 404.html && git commit -m "Update wrapper" && git push
+  git add index.html 404.html .nojekyll pages/.nojekyll && git commit -m "Update wrapper" && git push
   ```
   (File root dan `pages/` saat ini identik — jangan edit root langsung, nanti divergen.)
 - **Ganti URL funnel:** cukup ganti satu baris `var BASE = '...'` di `pages/index.html` + `pages/404.html`, copy ke root, push. Lihat juga `PUBLIC_HOST` di `.env` (domain yang boleh iframe viewer — harus cocok dengan domain wrapper).
